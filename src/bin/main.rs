@@ -2,17 +2,20 @@ use std::net::TcpListener;
 use std::net::TcpStream;
 use std::io::prelude::*;
 use std::fs;
+use server::ThreadPool;
 
 fn main() {
     let addr = "127.0.0.1";
     let port = "8000";
     let listener = TcpListener::bind(format!("{}:{}", addr, port)).unwrap();
+    let pool = ThreadPool::new(4);
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
         println!("connection established");
-        
-        handle_connection(stream);
+        pool.execute(|| {
+            handle_connection(stream);
+        })
     }
 }
 
